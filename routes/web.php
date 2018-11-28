@@ -26,6 +26,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     //需要验证邮箱才可使用的路由
     Route::group(['middleware' => 'email_verified'], function () {
-        
+
     });
 });
