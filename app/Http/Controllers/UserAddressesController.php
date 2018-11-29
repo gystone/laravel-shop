@@ -61,7 +61,7 @@ class UserAddressesController extends Controller
     {
         $this->authorize('own', $user_address);
         $user_address->delete();
-        return [];
+        return response()->json(['message'=>'删除成功']);
     }
 
 }

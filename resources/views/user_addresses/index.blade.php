@@ -65,9 +65,16 @@
                         }
                         // 调用删除接口，用 id 来拼接出请求的 url
                         axios.delete('/user_addresses/' + id)
-                            .then(function () {
-                                // 请求成功之后重新加载页面
-                                location.reload();
+                            .then(function (data) {
+                                swal({
+                                    title: data.data.message,
+                                    text:'您已删除当前地址',
+                                    icon: "success",
+                                })
+                                    .then(function () {
+                                        // 请求成功之后重新加载页面
+                                        location.reload();
+                                    })
                             })
                     });
             });
