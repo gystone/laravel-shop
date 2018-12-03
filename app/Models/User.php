@@ -40,6 +40,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'user_favorite_products')
             ->withTimestamps()->orderBy('user_favorite_products.created_at', 'desc');
+    }
 
+    public function CartItems()
+    {
+        return $this->hasMany(CartItem::class);
     }
 }
