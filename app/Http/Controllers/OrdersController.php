@@ -53,7 +53,7 @@ class OrdersController extends Controller
                 $item->save();
                 $totalAmount += $sku->price * $data['amount'];
 
-                if($sku->decreaseStock($data['amount']) <=0 ){
+                if ($sku->decreaseStock($data['amount']) <= 0) {
                     throw new InternalException('该商品库存不足');
                 }
             }
@@ -83,22 +83,14 @@ class OrdersController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate();
 
-        return view('orders.index',['orders'=>$orders]);
+        return view('orders.index', ['orders' => $orders]);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public function show(Order $order, Request $request)
+    {
+        $this->authorize('own', $order);
+        return view('orders.show', ['order' => $order->load(['items.productSku', 'items.product'])]);
+    }
 
 
 }
