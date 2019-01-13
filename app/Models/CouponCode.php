@@ -36,19 +36,19 @@ class CouponCode extends Model
     // 指明这两个字段是日期类型
     protected $dates = ['not_before', 'not_after'];
 
-    protected  $appends =['description'];
+    protected $appends = ['description'];
 
     public function getDescriptionAttribute()
     {
         $str = '';
 
         if ($this->min_amount > 0) {
-            $str = '满'.str_replace('.00', '', $this->min_amount);
+            $str = '满' . str_replace('.00', '', $this->min_amount);
         }
         if ($this->type === self::TYPE_PERCENT) {
-            return $str.'优惠'.str_replace('.00', '', $this->value.'%');
+            return $str . '优惠' . str_replace('.00', '', $this->value . '%');
         }
-        return $str.'减'.str_replace('.00', '', $this->value);
+        return $str . '减' . str_replace('.00', '', $this->value);
 
     }
 
@@ -64,7 +64,7 @@ class CouponCode extends Model
         return $code;
     }
 
-    public function checkAvailable($orderAmount = null)
+    public function checkAvailable(User $user, $orderAmount = null)
     {
         if (!$this->enabled) {
             throw new CouponCodeUnavailableException('优惠券不存在');
@@ -85,6 +85,24 @@ class CouponCode extends Model
         if (!is_null($orderAmount) && $orderAmount < $this->min_amount) {
             throw new CouponCodeUnavailableException('订单金额不满足该优惠券最低金额');
         }
+
+        $used = Order::where('user_id', $user->id)
+            ->where('coupon_code_id', $this->id)
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->whereNull('paid_at')
+                        ->where('closed', false);
+                })->orWhere(function ($query) {
+                    $query->whereNotNull('paid_at')
+                        ->where('refund_status', '!=', Order::REFUND_STATUS_SUCCESS);
+                });
+            })
+            ->exists();
+        if ($used) {
+            throw new CouponCodeUnavailableException('你已经使用过这张优惠券了');
+        }
+
+
     }
 
     //计算优惠后的金额
@@ -111,8 +129,6 @@ class CouponCode extends Model
             return $this->decrement('used');
         }
     }
-
-
 
 
 }
